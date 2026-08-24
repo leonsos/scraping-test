@@ -61,8 +61,19 @@ El scraper interactúa directamente con el protocolo HTTP stateful de JSF (JavaS
    # En Linux/macOS
    BASE_URL=http://localhost:3000/jurisprudenciaweb npm run retry-failed
    ```
+5. **Ejecutar contra el Entorno de Producción Real (Requiere VPN de Perú):**
+   * Asegúrate de conectar tu terminal o máquina a una **VPN con IP peruana** (indispensable para evitar bloqueos del WAF).
+   * Ejecuta directamente el runner principal sin variables de entorno extra:
+     ```bash
+     npm run dev
+     ```
+   * Del mismo modo, si deseas procesar la cola de descargas fallidas en el entorno real, ejecuta:
+     ```bash
+     npm run retry-failed
+     ```
+
 ### Nota de Producción e IP de Perú (VPN)
-El acceso al subdominio `jurisprudencia.pj.gob.pe` bloquea las llamadas provenientes de IPs internacionales con un error `403 Forbidden`. Para ejecutar este scraper contra el portal de producción real, **es imperativo ejecutar el código desde un servidor ubicado en Perú o a través de una red VPN peruana**.
+El acceso al subdominio `jurisprudencia.pj.gob.pe` bloquea las llamadas provenientes de IPs internacionales con un error `403 Forbidden`.
 
 ### Límite de Ejecución de Prueba (Evaluación Rápida)
 Para evitar que el proceso secuencial con backoff de red consuma excesivo tiempo recorriendo cientos de páginas del Poder Judicial, el scraper incluye un limitador predeterminado:
@@ -98,7 +109,12 @@ Para facilitar el proceso de revisión por parte del equipo técnico evaluador, 
 * `npm run dev`: Runs the main scraper runner.
 * `npm run retry-failed`: Re-executes PDF downloads from the local queue on disk.
 
-*(Note: To target production servers, you must run the scripts under a Peruvian IP address / VPN due to WAF restrictions.)*
+### Running against Real Production Portal (Requires Peruvian VPN)
+1. Turn on a **VPN with a Peruvian IP address** (necessary to avoid the country-level firewall blocking with 403 Forbidden).
+2. Run the crawler without local environment modifiers:
+   ```bash
+   npm run dev
+   ```
 
 ### Session Page Limits (Fast Evaluation Run)
 To prevent the scraping job from spending hours paginating through hundreds of judiciary results, the scraper includes a configurable run limit:
