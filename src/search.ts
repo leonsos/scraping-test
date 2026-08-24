@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio';
 import qs from 'qs';
 import { HttpClient } from './httpClient';
-import { CONFIG } from './config';
+import { CONFIG, CorteJudicial } from './config';
 import { JsfSession } from './jsfSession';
 import { Logger } from './logger';
 
@@ -19,15 +19,14 @@ export class Search {
 
             // El ViewState inicial suele estar en un campo oculto del formulario
             const viewState = $('input[name="javax.faces.ViewState"]').val();
-
             if (!viewState || typeof viewState !== 'string') {
-                throw new Error('No se pudo encontrar el javax.faces.ViewState inicial en la página de inicio.');
+                throw new Error('No se pudo encontrar el ViewState inicial en inicio.xhtml');
             }
 
             JsfSession.setViewState(viewState);
             Logger.info('Sesión JSF inicializada con éxito.');
         } catch (err: any) {
-            Logger.error('Fallo durante el bootstrap de sesión', err);
+            Logger.error('Fallo en bootstrap de sesión JSF:', err.message || err);
             throw err;
         }
     }
@@ -35,7 +34,10 @@ export class Search {
     /**
      * Envía la petición POST inicial de búsqueda y recupera el HTML de resultados.
      */
-    public static async executeSearch(query: string = CONFIG.SEARCH_QUERY): Promise<string> {
+    public static async executeSearch(
+        query: string = CONFIG.SEARCH_QUERY,
+        corte: CorteJudicial = CONFIG.SEARCH_CORTE
+    ): Promise<string> {
         if (!JsfSession.hasViewState()) {
             await this.bootstrap();
         }
@@ -50,7 +52,7 @@ export class Search {
             'javax.faces.ViewState': viewState,
             'formBuscador:tabpanel-value': 'general',
             'formBuscador:txtBusqueda': query,
-            'formBuscador:buCorte': '1', // 1 representa a la Corte Suprema
+            'formBuscador:buCorte': corte, // corte parametrizada mediante enum
             'formBuscador:buDistrito': '0',
             'formBuscador:buEspecialidad': '0',
             'formBuscador:buSala': '0',

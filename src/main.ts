@@ -77,15 +77,16 @@ async function run() {
         await Search.bootstrap();
 
         // 3. Búsqueda inicial
-        let pageHtml = await Search.executeSearch(CONFIG.SEARCH_QUERY);
+        let pageHtml = await Search.executeSearch(CONFIG.SEARCH_QUERY, CONFIG.SEARCH_CORTE);
 
         // Si la lectura guardada estaba en una página posterior a la 1, adelantar estado
         if (currentPage > 1) {
             Logger.info(`Navegando directamente a la página guardada en progreso: ${currentPage}`);
-            pageHtml = await Pagination.goToPage(currentPage, CONFIG.SEARCH_QUERY);
+            pageHtml = await Pagination.goToPage(currentPage, CONFIG.SEARCH_QUERY, CONFIG.SEARCH_CORTE);
         }
 
         let active = true;
+        let pagesProcessed = 0;
         while (active) {
             Logger.info(`\n--- FILTRANDO RESULTADOS PÁGINA ${currentPage} ---`);
 
@@ -100,12 +101,19 @@ async function run() {
             // Guardar el número de página completado
             RetryQueue.updateCurrentPage(currentPage);
 
+            pagesProcessed++;
+            if (CONFIG.MAX_PAGES && pagesProcessed >= CONFIG.MAX_PAGES) {
+                Logger.info(`Límite configurado de páginas por sesión alcanzado (${CONFIG.MAX_PAGES}). Frenando ejecucion de manera ordenada.`);
+                active = false;
+                break;
+            }
+
             // Avanzar de página utilizando AJAX de RichFaces
             const nextPage = currentPage + 1;
             Logger.info(`Saltando a la siguiente página (${nextPage}) mediante AJAX...`);
 
             try {
-                pageHtml = await Pagination.goToPage(nextPage, CONFIG.SEARCH_QUERY);
+                pageHtml = await Pagination.goToPage(nextPage, CONFIG.SEARCH_QUERY, CONFIG.SEARCH_CORTE);
                 currentPage = nextPage;
             } catch (err) {
                 Logger.error(`No se pudo cargar la página ${nextPage}. Deteniendo barrido de páginas. Detalle:`, err);

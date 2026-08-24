@@ -1,6 +1,6 @@
 # Stateful JSF/RichFaces Jurisprudence Scraper (Poder Judicial del Perú)
 
-Este proyecto es un Web Scraper de nivel Senior desarrollado en **TypeScript** y **Node.js** diseñado específicamente para extraer resoluciones judiciales del portal de jurisprudencia del Poder Judicial del Perú.
+Este proyecto es un Web Scraper desarrollado en **TypeScript** y **Node.js** diseñado específicamente para extraer resoluciones judiciales del portal de jurisprudencia del Poder Judicial del Perú.
 
 El scraper interactúa directamente con el protocolo HTTP stateful de JSF (JavaServer Faces) y RichFaces 4.x, simulando el comportamiento de un navegador real sin la sobrecarga de memoria de navegadores de automatización (como Puppeteer o Playwright).
 
@@ -64,7 +64,13 @@ El scraper interactúa directamente con el protocolo HTTP stateful de JSF (JavaS
 ### Nota de Producción e IP de Perú (VPN)
 El acceso al subdominio `jurisprudencia.pj.gob.pe` bloquea las llamadas provenientes de IPs internacionales con un error `403 Forbidden`. Para ejecutar este scraper contra el portal de producción real, **es imperativo ejecutar el código desde un servidor ubicado en Perú o a través de una red VPN peruana**.
 
-### 🌟 Cumplimiento de Criterios de Evaluación (Criterio de Seniority)
+### Límite de Ejecución de Prueba (Evaluación Rápida)
+Para evitar que el proceso secuencial con backoff de red consuma excesivo tiempo recorriendo cientos de páginas del Poder Judicial, el scraper incluye un limitador predeterminado:
+*   **Parámetro:** `CONFIG.MAX_PAGES` en [src/config.ts](file:///c:/laragon/www/scraping/src/config.ts).
+*   **Valor por defecto:** `2` (el scraper procesará 2 páginas de resultados por sesión y frenará de forma controlada).
+*   **Ejecución completa:** Para desactivar este límite y permitir el barrido de todo el portal hasta el fin, cambia el valor a `0` o `null` en el archivo de configuración.
+
+### 🌟 Cumplimiento de Criterios de Evaluación
 Para facilitar el proceso de revisión por parte del equipo técnico evaluador, detallamos cómo la arquitectura aborda directamente cada criterio del desafío:
 
 1. **Ingeniería HTTP Directa (Sin Navegador):** Emulamos el ciclo de vida stateful de JavaServer Faces (JSF) gestionando manualmente la cookie `JSESSIONID` y el token dinámico de vista `javax.faces.ViewState` en `src/jsfSession.ts`, evitando levantar navegadores pesados.
@@ -93,6 +99,12 @@ Para facilitar el proceso de revisión por parte del equipo técnico evaluador, 
 * `npm run retry-failed`: Re-executes PDF downloads from the local queue on disk.
 
 *(Note: To target production servers, you must run the scripts under a Peruvian IP address / VPN due to WAF restrictions.)*
+
+### Session Page Limits (Fast Evaluation Run)
+To prevent the scraping job from spending hours paginating through hundreds of judiciary results, the scraper includes a configurable run limit:
+*   **Property:** `CONFIG.MAX_PAGES` inside [src/config.ts](file:///c:/laragon/www/scraping/src/config.ts).
+*   **Default:** `2` (the scraper will fetch and execute downloads for 2 pages before stopping gracefully).
+*   **Uncapped runs:** Set `MAX_PAGES` to `0` or `null` in the config file to let the scraper paginate indefinitely until the end of the results.
 
 ### 🌟 Technical Evaluation Mapping
 1. **HTTP level Reverse Engineering:** No headless browsers. Full simulation of JSF lifecycle, tracking session cookies and `ViewState` as form-encoded variables.

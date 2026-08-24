@@ -1,6 +1,6 @@
 import qs from 'qs';
 import { HttpClient } from './httpClient';
-import { CONFIG } from './config';
+import { CONFIG, CorteJudicial } from './config';
 import { JsfSession } from './jsfSession';
 import { XmlPartial } from './xmlPartial';
 import { Logger } from './logger';
@@ -10,7 +10,11 @@ export class Pagination {
      * Cambia a una página de resultados específica usando la solicitud AJAX de RichFaces.
      * Retorna el HTML del fragmento de la tabla de resultados.
      */
-    public static async goToPage(pageNumber: number, query: string = CONFIG.SEARCH_QUERY): Promise<string> {
+    public static async goToPage(
+        pageNumber: number,
+        query: string = CONFIG.SEARCH_QUERY,
+        corte: CorteJudicial = CONFIG.SEARCH_CORTE
+    ): Promise<string> {
         Logger.info(`Navegando hacia la página de resultados: ${pageNumber}`);
         const client = HttpClient.getInstance();
         const viewState = JsfSession.getViewState();
@@ -20,7 +24,7 @@ export class Pagination {
             'formBuscador': 'formBuscador',
             'javax.faces.ViewState': viewState,
             'formBuscador:txtBusqueda': query,
-            'formBuscador:buCorte': '1',
+            'formBuscador:buCorte': corte,
             'formBuscador:buDistrito': '0',
             'formBuscador:buEspecialidad': '0',
             'formBuscador:buPretensionValue': '',
